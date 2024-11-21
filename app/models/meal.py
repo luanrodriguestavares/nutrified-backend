@@ -12,7 +12,7 @@ class Meal(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     foods = db.relationship('FoodInMeal', backref='meal', lazy=True)
 
-    # Validador para garantir que o total de calorias seja um valor positivo
+    # Valida o total de calorias
     @validates('total_calories')
     def validate_total_calories(self, key, value):
         if value < 0:
@@ -26,15 +26,18 @@ class Meal(db.Model):
             'user_id': self.user_id,
             'total_calories': self.total_calories,
             'date': self.date.isoformat(),
-            'foods': [food.to_dict() for food in self.foods]
+            'foods': [
+                food.to_dict() for food in self.foods if food.food is not None
+            ], 
         }
 
-    # Atualiza o total de calorias consumidas pelo usuário no dia
+    # Atualiza a quantidade de calorias consumidas pelo usuário
     def update_user_calories(self):
         user = User.query.get(self.user_id)
-        user.reset_daily_calories()
-        user.daily_calories_consumed += self.total_calories
-        db.session.commit()
+        if user:
+            user.reset_daily_calories()
+            user.daily_calories_consumed += self.total_calories
+            db.session.commit()
 
 
 
@@ -45,17 +48,15 @@ class FoodInMeal(db.Model):
     food_id = db.Column(db.Integer, db.ForeignKey('food.id'), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
     calories = db.Column(db.Float, nullable=False)
-
-    # Adicionando a relação com a tabela Food
     food = db.relationship('Food', backref='food_in_meals', lazy=True)
 
     # Converte o objeto para um dicionário
     def to_dict(self):
         return {
             'food_id': self.food_id,
-            'food_name': self.food.name, 
+            'food_name': self.food.name if self.food else 'Unknown',
             'quantity': self.quantity,
-            'calories': self.calories
+            'calories': self.calories,
         }
 
     # Calcula as calorias totais dessa comida em uma refeição
