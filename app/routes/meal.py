@@ -42,6 +42,10 @@ def create_meal():
         # Validar dados dos alimentos
         if not food_id or quantity is None or calories is None:
             return jsonify({'error': 'Food ID, quantity, and calories are required'}), 400
+        
+        # Validar se a quantidade é maior que zero
+        if quantity <= 0:
+            return jsonify({'error': 'Quantity must be greater than zero'}), 400
 
         # Verificar se o alimento existe
         linked_food = Food.query.get(food_id)

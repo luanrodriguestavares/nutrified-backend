@@ -12,17 +12,21 @@ class UserService:
         
         # Calcular calorias baseado no objetivo
         if user.goal == 'lose weight':
-            return bmr - 500
-        
+            calories = bmr - 500
         elif user.goal == 'maintain weight':
-            return bmr
-        
+            calories = bmr
         elif user.goal == 'gain weight':
-            return bmr + 500
-        
-        return bmr
+            calories = bmr + 500
+        else:
+            calories = bmr
+
+        # Arredondar para o valor inteiro mais próximo ou com uma casa decimal
+        return round(calories, 1)  
 
     # Calcular quantidade de agua
     @staticmethod
     def calculate_water(user: User):
-        return user.weight * 30 
+        water = user.weight * 30
+        
+        # Arredondar para o valor inteiro mais próximo ou com uma casa decimal
+        return round(water, 1)
